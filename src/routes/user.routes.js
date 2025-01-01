@@ -10,16 +10,16 @@ const router = Router()
 // router.route("/logout").post(verifyJwt, logoutUser)
 // router.route("/verify").get(verifyJwt)
 // router.route("/").get(verifyJwt,allUser)
-// router.route("/current-user").get(verifyJwt,getCurrentUser)
+// router.route("/current-user").get(verifyJwt,userController.getCurrentUser)
 
 router
     .post('/register', userController.registerUser)
     .post('/login', userController.loginUser)
-    .get('/:id', verifyJwt, userController.GetById)
     .post('/logout', verifyJwt, userController.logoutUser)
     .get('/verify', verifyJwt)
     .get('/', verifyJwt, userController.allUser)
     .get('/current-user', verifyJwt, userController.getCurrentUser)
+    .get('/:id', verifyJwt, userController.GetById)
     
 
 export default router

@@ -27,9 +27,14 @@ const loginUser = async(req, res) => {
     if(!(username && password)){
         return res.status(400).json({ status: false, message: "Username and password are required" });
     }
-    const checkUser = await User.findOne({username}).select("-password");
+    const checkUser = await User.findOne({username})
     if(!checkUser){
         return res.status(400).json({status: false, message: "User does not exist."})
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, checkUser.password);
+    if (!isPasswordValid) {
+        return res.status(400).json({ status: false, message: "Invalid password." });
     }
 
     const accessToken = jwt.sign(
@@ -44,15 +49,47 @@ const loginUser = async(req, res) => {
     // .cookie("accessToken", accessToken)
     .status(200).json({user: checkUser,accessToken, status: true, message: "User Login Successfull"})
 }
-const GetById = async(req, res) => {
-    const { userId } = req.params;
-  const user = await User.findOne(userId);
-  if (!user) {
-    return res.status(401).json({ status: false,message: "Unauthorized" });
-  }
-  res.status(200).json({ user,status: true, message: "user fetched successfully" });
-    
-}
+const GetById = async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      // Validate id exists in params
+      if (!id) {
+        return res.status(400).json({
+          status: false,
+          message: "User ID is required",
+        });
+      }
+  
+      // Fetch the user by ID
+      const user = await User.findById(id);
+  
+      // Check if user exists
+      if (!user) {
+        return res.status(404).json({
+          status: false,
+          message: "User not found",
+        });
+      }
+  
+      // Send success response
+      res.status(200).json({
+        status: true,
+        user,
+        message: "User fetched successfully",
+      });
+    } catch (error) {
+      console.error("Error fetching user by ID:", error.message);
+  
+      // Handle server errors
+      res.status(500).json({
+        status: false,
+        message: "An error occurred while fetching the user",
+      });
+    }
+  };
+
+  
 const getCurrentUser = async(req, res) => {
     return res.status(200).json({user: req.user, status: true, message: "Current user fetched successfully"})
 }
